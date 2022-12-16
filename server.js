@@ -7,19 +7,18 @@ import { createServer as createViteServer } from "vite";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // process.env.NODE_ENV = 'development' 'production'
-console.log(process.env.NODE_ENV)
-const isProd = process.env.NODE_ENV === "production";
-let vite;
+
+const isProd = process.env.NODE_ENV.trim() === "production";
+console.log("process.env.NODE_ENV: ", process.env.NODE_ENV, "isProd:", isProd);
 async function createServer() {
   const app = express();
+  // 以中间件模式创建 Vite 应用，这将禁用 Vite 自身的 HTML 服务逻辑
+  // 并让上级服务器接管控制
+  let vite = await createViteServer({
+    server: { middlewareMode: true },
+    appType: "custom",
+  });
   if (!isProd) {
-    // 以中间件模式创建 Vite 应用，这将禁用 Vite 自身的 HTML 服务逻辑
-    // 并让上级服务器接管控制
-    vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "custom",
-    });
-
     // 使用 vite 的 Connect 实例作为中间件
     // 如果你使用了自己的 express 路由（express.Router()），你应该使用 router.use
     app.use(vite.middlewares);
@@ -46,17 +45,15 @@ async function createServer() {
         // 3. 加载服务器入口。vite.ssrLoadModule 将自动转换
         //    你的 ESM 源码使之可以在 Node.js 中运行！无需打包
         //    并提供类似 HMR 的根据情况随时失效。
-        render = await vite.ssrLoadModule("/src/entry-server.ts").render;
+        render = (await vite.ssrLoadModule("/src/entry-server.ts")).render;
       } else {
         // 1. 读取 index.html
         template = fs.readFileSync(
           path.resolve(__dirname, "dist/client/index.html"),
           "utf-8"
         );
-        // 3. 加载服务器入口。vite.ssrLoadModule 将自动转换
-        //    你的 ESM 源码使之可以在 Node.js 中运行！无需打包
-        //    并提供类似 HMR 的根据情况随时失效。
-        render = require("./dist/server/entry-server.js").render;
+
+        render = (await import("./dist/server/entry-server.js")).render;
       }
 
       // 4. 渲染应用的 HTML。这假设 entry-server.js 导出的 `render`
@@ -76,10 +73,23 @@ async function createServer() {
       next(e);
     }
   });
-
-  app.listen(5173, () => {
-    console.log("app.listen", isProd ? "生产环境" : "开发环境");
-  });
+  if (!isProd) {
+    app.listen(5173, () => {
+      console.log(
+        "app.listen",
+        isProd ? "生产环境" : "开发环境",
+        "http://localhost:5173/"
+      );
+    });
+  } else {
+    app.listen(5174, () => {
+      console.log(
+        "app.listen",
+        isProd ? "生产环境" : "开发环境",
+        "http://localhost:5174/"
+      );
+    });
+  }
 }
 
 createServer();
