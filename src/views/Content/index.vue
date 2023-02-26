@@ -1,15 +1,43 @@
-<script setup lang="ts">
-import { reactive, ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import loopimg from '@/assets/img/21975b8694ef2bae4f2e5d6dca3448ca7fae3346.png@976w_550h_1c_!web-home-carousel-cover.avif'
-const currentDate = ref(new Date())
-const currentTitle = ref('路人超能100 III(灵能百分百 第三季)')
-const route = useRouter();
-const navToC = () => {
-  route.push({
-    path: '/login'
-  })
-}
+<script lang="ts">
+import { reactive, ref, defineComponent, onMounted } from 'vue';
+import { useRouter, useRoute,  } from 'vue-router';
+import { useMainStore } from '@/store/main';
+import type { Pinia } from 'pinia';
+import type { Router } from 'vue-router';
+import { storeToRefs } from 'pinia';
+
+export default defineComponent({
+  setup() {
+    const currentDate = ref(new Date())
+    const currentTitle = ref('路人超能100 III(灵能百分百 第三季)')
+    const route = useRouter();
+    const store = useMainStore();
+    const navToC = () => {
+      route.push({
+        path: '/login'
+      })
+    }
+    
+    let { count } = storeToRefs(store)
+    let loopimg = new URL('@/assets/img/21975b8694ef2bae4f2e5d6dca3448ca7fae3346.png@976w_550h_1c_!web-home-carousel-cover.avif', import.meta.url).href
+    
+    onMounted(function(){
+      // console.log("onMounted",import.meta.env.SSR)
+    })
+    return {
+      currentDate,
+      count,
+      currentTitle,
+      loopimg,
+      navToC,
+      increment:store.increment
+    }
+  },
+  asyncData({store, route}:{store: Pinia, route: Router}) {
+    console.log(store, route);
+    
+  }
+})
 </script>
 
 <template>
@@ -17,24 +45,23 @@ const navToC = () => {
     <div class="container">
       <el-carousel trigger="click" height="310px" class="recommended-swipe">
         <el-carousel-item v-for="item in 4" :key="item">
-          <el-image
-            :src="loopimg" fit="cover" class="image"/>
+          <el-image :src="loopimg" fit="cover" class="image" />
         </el-carousel-item>
-        
+
       </el-carousel>
       <div class="recommended-card" v-for="item in 100" :key="item">
         <el-card :body-style="{ padding: '0px' }" @click="navToC">
-            <img src="../../assets/img/6098014b52aeaf8a714c30fb4fc3f4e0b19daa62.png@672w_378h_1c_!web-home-common-cover.avif"
-            fit="cover"
-              class="image"/>
-            <div style="padding: 10px">
-              <span>Yummy hamburger</span>
-              <div class="bottom">
-                <time class="time">{{ currentTitle }}</time>
-                <el-button text class="button">up xxx {{currentDate.getFullYear()}}年</el-button>
-              </div>
+          <img
+            src="../../assets/img/6098014b52aeaf8a714c30fb4fc3f4e0b19daa62.png@672w_378h_1c_!web-home-common-cover.avif"
+            fit="cover" class="image" />
+          <div style="padding: 10px" @click.stop="increment">
+            <span>Yummy hamburger</span>
+            <div class="bottom">
+              <time class="time">{{ currentTitle }}</time>
+              <el-button text class="button">up{{ count }} xxx {{ currentDate.getFullYear() }}年</el-button>
             </div>
-          </el-card>
+          </div>
+        </el-card>
       </div>
     </div>
   </div>
@@ -130,13 +157,13 @@ const navToC = () => {
   grid-column: span 2;
   grid-row: 1 / 3;
   grid-column: 1 / 3;
-  
+
 }
-.recommended-card{
-  
-}
-.image{
-  width:100%;
-  height:100%;
+
+.recommended-card {}
+
+.image {
+  width: 100%;
+  height: 100%;
 }
 </style>

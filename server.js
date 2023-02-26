@@ -9,7 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // process.env.NODE_ENV = 'development' 'production'
 
 const isProd = process.env.NODE_ENV.trim() === "production";
-console.log("process.env.NODE_ENV: ", process.env.NODE_ENV, "isProd:", isProd);
+
 async function createServer() {
   const app = express();
   // 以中间件模式创建 Vite 应用，这将禁用 Vite 自身的 HTML 服务逻辑
@@ -83,6 +83,7 @@ async function createServer() {
     });
   } else {
     app.listen(5174, () => {
+      console.log("process.env.NODE_ENV: ", process.env.NODE_ENV, "isProd:", isProd);
       console.log(
         "app.listen",
         isProd ? "生产环境" : "开发环境",

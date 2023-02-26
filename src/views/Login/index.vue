@@ -50,7 +50,6 @@ const resetForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.resetFields()
 }
-throw '报错测试'
 </script>
 <template>
   <div class="bg">

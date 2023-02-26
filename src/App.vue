@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import { reactive, ref } from 'vue';
+import { provide, reactive, ref } from 'vue';
 import { RouterLink, RouterView, useRouter } from 'vue-router';
-import { ElConfigProvider } from 'element-plus'
+import { ElConfigProvider, ID_INJECTION_KEY } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import zhCn from 'element-plus/lib/locale/lang/zh-cn'
 import en from 'element-plus/lib/locale/lang/en'
@@ -18,6 +18,11 @@ router.beforeEach((to, from, next)=>{
     isShow.value = true;
   }
   next()
+})
+
+provide(ID_INJECTION_KEY, {
+  prefix: 100,
+  current: 0,
 })
 
 const { locale:localeLang } = useI18n()
